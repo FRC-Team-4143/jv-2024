@@ -1,5 +1,7 @@
 package frc.lib.swerve.generated;
 
+import java.security.cert.TrustAnchor;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import frc.lib.swerve.SwerveModuleConstantsFactory;
 import frc.lib.swerve.SwerveModuleConstants.SwerveModuleSteerFeedbackType;
@@ -34,17 +36,17 @@ public class TunerConstants {
     // This may need to be tuned to your individual robot
     private static final double kCoupleRatio = 3.5;
     
-    private static final double kDriveGearRatio = 5.14; // Mk4i: 6.12, Mk4: 5.14 
-    private static final double kSteerGearRatio = 12.8; // Mk4i: (150.0/7.0), Mk4: 12.8
-    private static final double kWheelRadiusInches = 1.6090288; //1.59997; // Estimated at first, then fudge-factored to make odom match record
+    private static final double kDriveGearRatio = 6.12; // Mk4i: 6.12, Mk4: 5.14 
+    private static final double kSteerGearRatio = (150.0/7.0); // Mk4i: (150.0/7.0), Mk4: 12.8
+    private static final double kWheelRadiusInches = 2.0; //1.59997; // Estimated at first, then fudge-factored to make odom match record
 
-    private static final boolean kSteerMotorReversed = false;
+    private static final boolean kSteerMotorReversed = true; 
     private static final boolean kInvertLeftSide = false;
     private static final boolean kInvertRightSide = false; //true;
 
     private static final int kPigeonId = 0;
     private static final double frameWidth = 19.0;
-    private static final double frameLength = 18.0;
+    private static final double frameLength = 23.0;
 
 
     // These are only used for simulation

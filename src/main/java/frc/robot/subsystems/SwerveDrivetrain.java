@@ -36,7 +36,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.kauailabs.navx.frc.AHRS;
 
 import frc.lib.subsystem.Subsystem;
 import frc.lib.swerve.*;
@@ -86,8 +88,9 @@ public class SwerveDrivetrain extends Subsystem {
     private SwerveRequest.FieldCentricFacingAngle target_facing;
 
     // Robot Hardware
-    private final Pigeon2 pigeon_imu;
+    // private final Pigeon2 pigeon_imu;
     private final SwerveModule[] swerve_modules;
+    private final AHRS ahrs;
 
     // Subsystem data class
     private SwerveDriverainPeriodicIoAutoLogged io_;
@@ -121,9 +124,10 @@ public class SwerveDrivetrain extends Subsystem {
         // make new io instance
         io_ = new SwerveDriverainPeriodicIoAutoLogged();
 
-        // Setup the Pigeon IMU
-        pigeon_imu = new Pigeon2(driveTrainConstants.Pigeon2Id, driveTrainConstants.CANbusName[0]);
-        pigeon_imu.optimizeBusUtilization();
+        // // Setup the Pigeon IMU
+        // pigeon_imu = new Pigeon2(driveTrainConstants.Pigeon2Id, driveTrainConstants.CANbusName[0]);
+        // pigeon_imu.optimizeBusUtilization();
+        ahrs = new AHRS(SerialPort.Port.kUSB);
 
         // Begin configuring swerve modules
         module_locations = new Translation2d[modules.length];
@@ -147,13 +151,13 @@ public class SwerveDrivetrain extends Subsystem {
 
         // Drive mode requests
         field_centric = new SwerveRequest.FieldCentric().withIsOpenLoop(false)
-                .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.01)
+                .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.1)
                 .withRotationalDeadband(Constants.DrivetrainConstants.MaxAngularRate * 0.01);
         robot_centric = new SwerveRequest.RobotCentric().withIsOpenLoop(false)
-                .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.01)
+                .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.1)
                 .withRotationalDeadband(Constants.DrivetrainConstants.MaxAngularRate * 0.01);
         target_facing = new SwerveRequest.FieldCentricFacingAngle().withIsOpenLoop(false)
-                .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.01)
+                .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.1)
                 .withRotationalDeadband(Constants.DrivetrainConstants.MaxAngularRate * 0.01);
         auto_request = new SwerveRequest.ApplyChassisSpeeds();
         request_parameters = new SwerveControlRequestParameters();
@@ -173,9 +177,9 @@ public class SwerveDrivetrain extends Subsystem {
             BaseStatusSignal.setUpdateFrequencyForAll(100, swerve_modules[i].getSignals());
             swerve_modules[i].optimizeCan();
         }
-        BaseStatusSignal[] imuSignals = { pigeon_imu.getYaw() };
-        BaseStatusSignal.setUpdateFrequencyForAll(100, imuSignals);
-        pigeon_imu.optimizeBusUtilization();
+        // BaseStatusSignal[] imuSignals = { pigeon_imu.getYaw() };
+        // BaseStatusSignal.setUpdateFrequencyForAll(100, imuSignals);
+        // pigeon_imu.optimizeBusUtilization();
 
         configurePathPlanner();
     }
@@ -191,9 +195,13 @@ public class SwerveDrivetrain extends Subsystem {
         io_.driver_joystick_leftY_ = OI.getDriverJoystickLeftY();
         io_.driver_joystick_rightX_ = OI.getDriverJoystickRightX();
 
-        io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(-pigeon_imu.getAngle() * Math.PI / 180));
+        // io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(-pigeon_imu.getAngle() * Math.PI / 180));
+        // io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(0 * Math.PI / 180));
+
+        io_.robot_yaw_= Rotation2d.fromRadians(MathUtil.angleModulus(-ahrs.getAngle() * Math.PI / 180));
 
         io_.chassis_speeds_ = kinematics.toChassisSpeeds(io_.current_module_states_);
+
     }
 
     @Override
@@ -207,7 +215,7 @@ public class SwerveDrivetrain extends Subsystem {
                         .withVelocityY(-io_.driver_joystick_leftX_ * Constants.DrivetrainConstants.MaxSpeed)
                         // Drive counterclockwise with negative X (left)
                         .withRotationalRate(
-                                -io_.driver_joystick_rightX_ * Constants.DrivetrainConstants.MaxAngularRate));
+                                io_.driver_joystick_rightX_ * Constants.DrivetrainConstants.MaxAngularRate));
                 break;
             case FIELD_CENTRIC:
                 setControl(field_centric
@@ -217,7 +225,7 @@ public class SwerveDrivetrain extends Subsystem {
                         .withVelocityY(-io_.driver_joystick_leftX_ * Constants.DrivetrainConstants.MaxSpeed)
                         // Drive counterclockwise with negative X (left)
                         .withRotationalRate(
-                                -io_.driver_joystick_rightX_ * Constants.DrivetrainConstants.MaxAngularRate));
+                                io_.driver_joystick_rightX_ * Constants.DrivetrainConstants.MaxAngularRate));
                 break;
             case TARGET:
                 setControl(target_facing

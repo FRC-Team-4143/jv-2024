@@ -10,17 +10,24 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.*;
 
 
+
 public abstract class OI {
 
     // Sets up both controllers
     static CommandXboxController driver_joystick_ = new CommandXboxController(0);
+    static SwerveDrivetrain swerve_drivetrain_ = SwerveDrivetrain.getInstance();
     // static CommandXboxController operator_joystick_ = new CommandXboxController(1)
 
     /*
      * Use this method to define controller bindings to commands and other actions
      */
     public static void configureBindings() {
-
+        SmartDashboard.putData("Set Wheel Offsets", Commands.runOnce(
+            () -> swerve_drivetrain_.tareEverything())
+            .ignoringDisable(true));
+    SmartDashboard.putData("Seed Field Centric", Commands.runOnce(
+            () -> swerve_drivetrain_.seedFieldRelative())
+            .ignoringDisable(true));
     }
 
     static public double getDriverJoystickLeftX() {
