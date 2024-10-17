@@ -5,8 +5,6 @@
 package frc.robot.subsystems;
 
 import frc.lib.subsystem.Subsystem;
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 public class ExampleSubsystem extends Subsystem {
 
@@ -26,7 +24,7 @@ public class ExampleSubsystem extends Subsystem {
     /**
      * 
      */
-    private ExamplePeriodicIoAutoLogged io_ = new ExamplePeriodicIoAutoLogged();
+    private ExamplePeriodicIo io_ = new ExamplePeriodicIo();
 
     /**
      * Constructor for the example subsystem. The constructor should create all
@@ -35,7 +33,7 @@ public class ExampleSubsystem extends Subsystem {
      * should be done in the reset() function.
      */
     private ExampleSubsystem() {
-        io_ = new ExamplePeriodicIoAutoLogged();
+        io_ = new ExamplePeriodicIo();
 
         reset();
     }
@@ -47,7 +45,7 @@ public class ExampleSubsystem extends Subsystem {
      * initializing data members.
      */
     public void reset() {
-        io_ = new ExamplePeriodicIoAutoLogged();
+        io_ = new ExamplePeriodicIo();
     }
 
     @Override
@@ -91,12 +89,6 @@ public class ExampleSubsystem extends Subsystem {
     public void outputTelemetry(double timestamp) {
     }
 
-    @Override
-    public LoggableInputs getLogger() {
-        return io_;
-    }
-
-    @AutoLog
     public static class ExamplePeriodicIo {
         public double test = 0;
     }

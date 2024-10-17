@@ -8,8 +8,8 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
+import monologue.Logged;
+import monologue.Annotations.Log;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -93,7 +93,7 @@ public class SwerveDrivetrain extends Subsystem {
     private final AHRS ahrs;
 
     // Subsystem data class
-    private SwerveDriverainPeriodicIoAutoLogged io_;
+    private SwerveDriverainPeriodicIo io_;
 
     // Drivetrain config
     final SwerveDriveKinematics kinematics;
@@ -122,10 +122,11 @@ public class SwerveDrivetrain extends Subsystem {
             SwerveModuleConstants... modules) {
 
         // make new io instance
-        io_ = new SwerveDriverainPeriodicIoAutoLogged();
+        io_ = new SwerveDriverainPeriodicIo();
 
         // // Setup the Pigeon IMU
-        // pigeon_imu = new Pigeon2(driveTrainConstants.Pigeon2Id, driveTrainConstants.CANbusName[0]);
+        // pigeon_imu = new Pigeon2(driveTrainConstants.Pigeon2Id,
+        // driveTrainConstants.CANbusName[0]);
         // pigeon_imu.optimizeBusUtilization();
         ahrs = new AHRS(SerialPort.Port.kUSB);
 
@@ -195,10 +196,13 @@ public class SwerveDrivetrain extends Subsystem {
         io_.driver_joystick_leftY_ = OI.getDriverJoystickLeftY();
         io_.driver_joystick_rightX_ = OI.getDriverJoystickRightX();
 
-        // io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(-pigeon_imu.getAngle() * Math.PI / 180));
-        // io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(0 * Math.PI / 180));
+        // io_.robot_yaw_ =
+        // Rotation2d.fromRadians(MathUtil.angleModulus(-pigeon_imu.getAngle() * Math.PI
+        // / 180));
+        // io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(0 * Math.PI /
+        // 180));
 
-        io_.robot_yaw_= Rotation2d.fromRadians(MathUtil.angleModulus(-ahrs.getAngle() * Math.PI / 180));
+        io_.robot_yaw_ = Rotation2d.fromRadians(MathUtil.angleModulus(-ahrs.getAngle() * Math.PI / 180));
 
         io_.chassis_speeds_ = kinematics.toChassisSpeeds(io_.current_module_states_);
 
@@ -235,6 +239,15 @@ public class SwerveDrivetrain extends Subsystem {
                         .withVelocityY(-io_.driver_joystick_leftX_ * Constants.DrivetrainConstants.MaxSpeed)
                         //
                         .withTargetDirection(io_.target_rotation_));
+                break;
+            case AUTONOMOUS:
+                setControl(robot_centric
+                        // Drive forward with negative Y (forward)
+                        .withVelocityX(-0.5)
+                        // Drive left with negative X (left)
+                        .withVelocityY(0)
+                        //
+                        .withRotationalRate(0));
                 break;
             default:
                 // yes these dont do anything for auto...
@@ -379,27 +392,36 @@ public class SwerveDrivetrain extends Subsystem {
         io_.drive_mode_ = mode;
     }
 
-    @Override
-    public LoggableInputs getLogger() {
-        return io_;
-    }
-
     /**
      * Plain-Old-Data class holding the state of the swerve drivetrain.
      * This encapsulates most data that is relevant for telemetry or
      * decision-making from the Swerve Drive.
      */
-    @AutoLog
-    public static class SwerveDriverainPeriodicIo extends LogData {
+    public static class SwerveDriverainPeriodicIo implements Logged {
+        @Log.File
         public SwerveModuleState[] current_module_states_, requested_module_states_;
+        @Log.File
         public SwerveModulePosition[] module_positions;
+        @Log.File
         public Rotation2d field_relative_offset_ = new Rotation2d();
+        @Log.File
         public Rotation2d robot_yaw_ = new Rotation2d();
+        @Log.File
         public double driver_joystick_leftX_ = 0.0;
+        @Log.File
         public double driver_joystick_leftY_ = 0.0;
+        @Log.File
         public double driver_joystick_rightX_ = 0.0;
+        @Log.File
         public ChassisSpeeds chassis_speeds_ = new ChassisSpeeds();
+        @Log.File
         public Rotation2d target_rotation_ = new Rotation2d();
-        public DriveMode drive_mode_ = DriveMode.FIELD_CENTRIC;
+        @Log.File
+        public DriveMode drive_mode_ = DriveMode.ROBOT_CENTRIC;
+    }
+
+    @Override
+    public Logged getLogged(){
+        return io_;
     }
 }

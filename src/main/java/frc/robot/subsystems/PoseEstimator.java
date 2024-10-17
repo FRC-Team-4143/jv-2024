@@ -9,9 +9,6 @@ import edu.wpi.first.networktables.ProtobufSubscriber;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.TimestampedObject;
 
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
-
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -30,7 +27,7 @@ public class PoseEstimator extends Subsystem {
         return poseEstimatorInstance;
     }
 
-    private PoseEstimatorPeriodicIoAutoLogged io_;
+    private PoseEstimatorPeriodicIo io_;
     private Field2d field_;
     private SwerveDrivePoseEstimator odometry_;
     private SwerveDrivePoseEstimator vision_filtered_odometry_;
@@ -40,7 +37,7 @@ public class PoseEstimator extends Subsystem {
 
     PoseEstimator() {
         NetworkTable table = NetworkTableInstance.getDefault().getTable("WarVision");
-        io_ = new PoseEstimatorPeriodicIoAutoLogged();
+        io_ = new PoseEstimatorPeriodicIo();
         field_ = new Field2d();
         var field_pose_topic = table.getProtobufTopic("vision/pose", Pose2d.proto);
         var robot_odom_topic = table.getProtobufTopic("vision/odom", Pose2d.proto);
@@ -59,7 +56,7 @@ public class PoseEstimator extends Subsystem {
                 new Rotation2d(), SwerveDrivetrain.getInstance().getModulePositions(),
                 new Pose2d());
         // vision_filtered_odometry.setVisionMeasurementStdDevs()
-        io_ = new PoseEstimatorPeriodicIoAutoLogged();
+        io_ = new PoseEstimatorPeriodicIo();
     }
 
     @Override
@@ -110,14 +107,8 @@ public class PoseEstimator extends Subsystem {
         vision_filtered_odometry_.resetPosition(drive.getImuYaw(), drive.getModulePositions(), pose);
     }
 
-    @AutoLog
-    public static class PoseEstimatorPeriodicIo extends LogData {
+    public static class PoseEstimatorPeriodicIo {
         Pose2d pose_ = new Pose2d();
         Pose2d vision_filtered_pose_ = new Pose2d();
-    }
-
-    @Override
-    public LoggableInputs getLogger() {
-        return io_;
     }
 }
