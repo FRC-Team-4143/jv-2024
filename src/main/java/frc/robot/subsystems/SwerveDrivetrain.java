@@ -31,7 +31,6 @@ import edu.wpi.first.math.MathUtil;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -151,13 +150,13 @@ public class SwerveDrivetrain extends Subsystem {
         kinematics = new SwerveDriveKinematics(module_locations);
 
         // Drive mode requests
-        field_centric = new SwerveRequest.FieldCentric().withIsOpenLoop(false)
+        field_centric = new SwerveRequest.FieldCentric().withIsOpenLoop(true)
                 .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.1)
                 .withRotationalDeadband(Constants.DrivetrainConstants.MaxAngularRate * 0.01);
-        robot_centric = new SwerveRequest.RobotCentric().withIsOpenLoop(false)
+        robot_centric = new SwerveRequest.RobotCentric().withIsOpenLoop(true)
                 .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.1)
                 .withRotationalDeadband(Constants.DrivetrainConstants.MaxAngularRate * 0.01);
-        target_facing = new SwerveRequest.FieldCentricFacingAngle().withIsOpenLoop(false)
+        target_facing = new SwerveRequest.FieldCentricFacingAngle().withIsOpenLoop(true)
                 .withDeadband(Constants.DrivetrainConstants.MaxSpeed * 0.1)
                 .withRotationalDeadband(Constants.DrivetrainConstants.MaxAngularRate * 0.01);
         auto_request = new SwerveRequest.ApplyChassisSpeeds();
@@ -169,6 +168,8 @@ public class SwerveDrivetrain extends Subsystem {
                 .getStructArrayTopic("module_states/requested", SwerveModuleState.struct).publish();
         current_state_pub = NetworkTableInstance.getDefault()
                 .getStructArrayTopic("module_states/current", SwerveModuleState.struct).publish();
+
+        SmartDashboard.putData("Set Wheel Offsets", Commands.runOnce(() -> tareEverything(), this));
     }
 
     @Override
@@ -273,9 +274,9 @@ public class SwerveDrivetrain extends Subsystem {
         current_state_pub.set(io_.current_module_states_);
         requested_state_pub.set(io_.requested_module_states_);
 
-        SmartDashboard.putNumber("Target Rotation", io_.target_rotation_.getDegrees());
         SmartDashboard.putNumber("Yaw", io_.robot_yaw_.getDegrees());
-        SmartDashboard.putNumber("Field relative offset", io_.field_relative_offset_.getDegrees());
+        SmartDashboard.putNumber("Field Centric Offset", io_.field_relative_offset_.getDegrees());
+        SmartDashboard.putBoolean("Is Field Centric", (io_.drive_mode_ == DriveMode.FIELD_CENTRIC));
     }
 
     /**
@@ -390,6 +391,18 @@ public class SwerveDrivetrain extends Subsystem {
      */
     public void setDriveMode(DriveMode mode) {
         io_.drive_mode_ = mode;
+    }
+
+    /**
+     * Toggles between field centric and robot centric DriveMode
+     */
+    public void toggleFieldCentric(){
+        if(io_.drive_mode_ == DriveMode.FIELD_CENTRIC){
+            io_.drive_mode_ = DriveMode.ROBOT_CENTRIC;
+        }
+        else{
+            io_.drive_mode_ = DriveMode.FIELD_CENTRIC;
+        }
     }
 
     /**

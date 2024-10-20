@@ -21,23 +21,26 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.swerve.SwerveRequest;
 import frc.robot.subsystems.SwerveDrivetrain;
 import frc.robot.subsystems.SwerveDrivetrain.DriveMode;
 import edu.wpi.first.cameraserver.CameraServer;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  private int counter = 0;
-  private double init_rotation;
-  private double encoder_diff;
 
-  private static final double INTAKE_PIVOT_OUT = 0.23;
-  private static final double INTAKE_PIVOT_IN = 0.85;
-  private static final double INTAKE_PIVOT_CONTROLLER_P = 0.05;
-  private static final double INTAKE_PIVOT_CONTROLLER_D = 0.00;
+  // Pivot Constants
+  private static final double INTAKE_PIVOT_OUT = Math.toRadians(0);
+  private static final double INTAKE_PIVOT_IN = Math.toRadians(180);
+  private static final double INTAKE_PIVOT_OFFSET = 0.8; // Encoder Native Unit (Rotations)
+  private static final double INTAKE_PIVOT_CONTROLLER_P = 0.005;
+  private static final double INTAKE_PIVOT_CONTROLLER_D = 0.05;
+  private static final double INTAKE_PIVOT_CONTROLLER_FF = 0.75;
+
+  double current_pivot_angle = 0.0;
+
+  // Shooter Constants
   public static final double SHOOT_SPEED = 0.99;
-  public static final double SHOOT_SPEED_SPIN = 0.8;
+  public static final double SHOOT_SPEED_SPIN_FACTOR = 0.8;
 
   private RobotContainer m_robotContainer;
   // Shooter
@@ -80,14 +83,14 @@ public class Robot extends TimedRobot {
     intakePivotController.setFeedbackDevice(intakePivotEncoder);
     intakePivotController.setP(INTAKE_PIVOT_CONTROLLER_P);
     intakePivotController.setD(INTAKE_PIVOT_CONTROLLER_D);
-    intakePivotController.setOutputRange(-0.3, 0.3, 0);
+    intakePivotController.setOutputRange(-1, 1, 0);
     
 
     shootAndMoveAuto = Commands.startEnd(
       () -> {lowerRightShooter.set(SHOOT_SPEED);
         upperRightShooter.set(SHOOT_SPEED);
-        upperLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN);
-        lowerLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN);
+        upperLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN_FACTOR);
+        lowerLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN_FACTOR);
         intakeRollers.set(-0.99);}, 
         () -> {lowerLeftShooter.set(0);
         lowerRightShooter.set(0);
@@ -103,8 +106,8 @@ public class Robot extends TimedRobot {
     shootAndDONTMoveAuto = Commands.startEnd(
       () -> {lowerRightShooter.set(SHOOT_SPEED);
         upperRightShooter.set(SHOOT_SPEED);
-        upperLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN);
-        lowerLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN);
+        upperLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN_FACTOR);
+        lowerLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN_FACTOR);
         intakeRollers.set(-0.99);}, 
         () -> {lowerLeftShooter.set(0);
         lowerRightShooter.set(0);
@@ -112,11 +115,11 @@ public class Robot extends TimedRobot {
         upperRightShooter.set(0);
         intakeRollers.set(0);}).withTimeout(2);
 
-    autoChooser.addOption("shootAndMoveAuto", shootAndMoveAuto);
-    autoChooser.addOption("shootAndDONTMoveAuto", shootAndDONTMoveAuto);
-    autoChooser.setDefaultOption("shootAndDONTMoveAuto", shootAndDONTMoveAuto);
+    autoChooser.addOption("Shoot & Go", shootAndMoveAuto);
+    autoChooser.addOption("Shoot & Stay", shootAndDONTMoveAuto);
+    autoChooser.setDefaultOption("Shoot & Stay", shootAndDONTMoveAuto);
 
-    SmartDashboard.putData("Auto",autoChooser);
+    SmartDashboard.putData("Auto Selector",autoChooser);
   }
 
   @Override
@@ -125,6 +128,12 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     SmartDashboard.putNumber("Intake Encoder", intakePivotEncoder.getPosition());
+    SmartDashboard.putNumber("Inatke Percent Power", intakePivot.getAppliedOutput());
+
+    current_pivot_angle =  (intakePivotEncoder.getPosition() - INTAKE_PIVOT_OFFSET) *  (2*Math.PI);
+
+    SmartDashboard.putNumber("Encoder Position", current_pivot_angle);
+
 
     // tell the subsystems to output telemetry to smartdashboard
     m_robotContainer.outputTelemetry();
@@ -143,7 +152,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     // m_robotContainer.initLogfile("AUTO");
 
-    autoChooser.getSelected().schedule();
+    m_autonomousCommand= autoChooser.getSelected();
+    m_autonomousCommand.schedule();
 
   }
 
@@ -172,8 +182,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     double mode = SmartDashboard.getNumber("Mode", 0);
-    encoder_diff = SmartDashboard.getNumber("Encoder Diff:", -45.0);
-    SmartDashboard.putNumber("Encoder Position", intakePivotEncoder.getPosition());
 
     // ----------- Manual Control -----------
     if (driver_controller.getYButton()) {
@@ -187,21 +195,24 @@ public class Robot extends TimedRobot {
       Rightclimber.set(0);
     }
 
-    // 
+    // Pivot Control
+    double pivot_arb_ff = Math.cos(current_pivot_angle) * INTAKE_PIVOT_CONTROLLER_FF;
+    SmartDashboard.putNumber("Encoder FF", pivot_arb_ff);
+
     if (driver_controller.getLeftBumper()) {
-      intakePivotController.setReference(INTAKE_PIVOT_OUT, ControlType.kVoltage);
+      intakePivotController.setReference(((INTAKE_PIVOT_OUT / 2 * Math.PI) + INTAKE_PIVOT_OFFSET), ControlType.kPosition, 0, pivot_arb_ff);
     }
     if (driver_controller.getRightBumper()) {
-      intakePivotController.setReference(INTAKE_PIVOT_IN, ControlType.kVoltage);
+      intakePivotController.setReference(((INTAKE_PIVOT_IN / 2 * Math.PI) + INTAKE_PIVOT_OFFSET), ControlType.kPosition, 0, pivot_arb_ff);
     }
 
-    // 
+    // Shooter Control
     if (mode == 0.0) {
       if (driver_controller.getXButton()) {
         lowerRightShooter.set(SHOOT_SPEED);
         upperRightShooter.set(SHOOT_SPEED);
-        upperLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN);
-        lowerLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN);
+        upperLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN_FACTOR);
+        lowerLeftShooter.set(-SHOOT_SPEED*SHOOT_SPEED_SPIN_FACTOR);
       } else {
         lowerLeftShooter.set(0);
         lowerRightShooter.set(0);
@@ -232,6 +243,10 @@ public class Robot extends TimedRobot {
         lowerLeftShooter.set(0);
         intakeRollers.set(0);
       }
+    }
+
+    if(driver_controller.getRightStickButtonPressed()){
+      SwerveDrivetrain.getInstance().toggleFieldCentric();
     }
 
   }

@@ -25,7 +25,7 @@ public class SwerveDrivetrainConstants {
     public String[] CANbusName = { "rio", "rio", "rio", "rio" };
 
     /** If using Pro, specify this as true to make use of all the Pro features. */
-    public boolean SupportsPro = true;
+    public boolean SupportsPro = false;
 
     /**
      * Sets the CAN ID of the Pigeon2 on the drivetrain.

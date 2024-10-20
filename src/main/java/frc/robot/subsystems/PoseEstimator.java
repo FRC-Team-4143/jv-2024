@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.Util;
 import frc.lib.subsystem.Subsystem;
+import monologue.Logged;
 
 public class PoseEstimator extends Subsystem {
 
@@ -107,8 +108,13 @@ public class PoseEstimator extends Subsystem {
         vision_filtered_odometry_.resetPosition(drive.getImuYaw(), drive.getModulePositions(), pose);
     }
 
-    public static class PoseEstimatorPeriodicIo {
+    public static class PoseEstimatorPeriodicIo implements Logged {
         Pose2d pose_ = new Pose2d();
         Pose2d vision_filtered_pose_ = new Pose2d();
+    }
+
+    @Override
+    public Logged getLogged(){
+        return io_;
     }
 }
