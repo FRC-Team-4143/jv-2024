@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.subsystem.Subsystem;
@@ -63,26 +64,26 @@ public class ShooterSubsystem extends Subsystem {
     @Override
     public void updateLogic(double timestamp) {
         switch(io_.mode_){
-            SOURCE_PICKUP:
-                target_left_shooter_speed_ = SOURCE_INTAKE_SPEED;
-                target_right_shooter_speed_ = SOURCE_INTAKE_SPEED;
+            case SOURCE_PICKUP:
+                io_.target_left_shooter_speed_ = ShooterConstants.SOURCE_INTAKE_SPEED;
+                io_.target_right_shooter_speed_ = ShooterConstants.SOURCE_INTAKE_SPEED;
                 break;
-            SHOOT:
-                target_left_shooter_speed_ = -SHOOT_SPEED * SHOOT_SPEED_SPIN_FACTOR;
-                target_right_shooter_speed_ = SHOOT_SPEED;
+            case SHOOT:
+                io_.target_left_shooter_speed_ = -ShooterConstants.SHOOT_SPEED * ShooterConstants.SHOOT_SPEED_SPIN_FACTOR;
+                io_.target_right_shooter_speed_ = ShooterConstants.SHOOT_SPEED;
                 break;
-            IDLE:
+            case IDLE:
             default:
-                target_left_shooter_speed_ = 0.0;
-                target_right_shooter_speed_ = 0.0;
+                io_.target_left_shooter_speed_ = 0.0;
+                io_.target_right_shooter_speed_ = 0.0;
                 break;
         }
     }
 
     @Override
     public void writePeriodicOutputs(double timestamp) {
-        lower_left_motor_.set(target_left_shooter_speed_);
-        lower_right_motor_.set(target_right_shooter_speed_);
+        lower_left_motor_.set(io_.target_left_shooter_speed_);
+        lower_right_motor_.set(io_.target_right_shooter_speed_);
     }
 
     @Override
@@ -90,7 +91,7 @@ public class ShooterSubsystem extends Subsystem {
     }
 
     public void setMode(ShooterMode mode){
-        io_.mode = mode;
+        io_.mode_ = mode;
     }
 
     public class ShooterSubsystemPeriodicIo implements Logged {

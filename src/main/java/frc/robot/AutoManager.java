@@ -3,9 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.commad.WaitCommand;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.*;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.*;
 
 
@@ -28,7 +26,7 @@ public class AutoManager {
 
         autoChooser.addOption("Shoot & Go", new Shoot().withTimeout(5).andThen(new AutoReverse().withTimeout(2)));
         autoChooser.addOption("Shoot & Stay", new Shoot().withTimeout(5));
-        autoChooser.addOption("Nothing", new WaitCommand(5))
+        autoChooser.addOption("Nothing", new WaitCommand(5));
 
         autoChooser.setDefaultOption("Nothing", new WaitCommand(5));
         SmartDashboard.putData("Selected Auto", autoChooser);

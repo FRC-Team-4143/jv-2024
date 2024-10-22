@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.subsystem.Subsystem;
@@ -64,23 +66,23 @@ public class ClimberSubsystem extends Subsystem {
     @Override
     public void updateLogic(double timestamp) {
         switch(io_.mode_){
-            EXTEND:
-                target_climber_speed_ = ClimberConstants.EXTEND_SPEED;
+            case EXTEND:
+                io_.target_climber_speed_ = ClimberConstants.EXTEND_SPEED;
                 break;
-            RETRACT:
-                target_climber_speed_ = ClimberConstants.RETRACT_SPEED;
+            case RETRACT:
+                io_.target_climber_speed_ = ClimberConstants.RETRACT_SPEED;
                 break;
-            IDLE:
+            case IDLE:
             default:
-                target_climber_speed_ = 0.0;
+                io_.target_climber_speed_ = 0.0;
                 break;
         }
     }
 
     @Override
     public void writePeriodicOutputs(double timestamp) {
-        left_motor_.set(target_climber_speed_);
-        right_motor_.set(target_climber_speed_);
+        left_motor_.set(io_.target_climber_speed_);
+        right_motor_.set(io_.target_climber_speed_);
     }
 
     @Override
@@ -88,7 +90,7 @@ public class ClimberSubsystem extends Subsystem {
     }
 
     public void setMode(ClimberMode mode){
-        io_.mode = mode;
+        io_.mode_ = mode;
     }
 
     public class ClimberSubsystemPeriodicIo implements Logged {

@@ -8,6 +8,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.subsystem.Subsystem;
@@ -48,7 +50,7 @@ public class PickupSubsystem extends Subsystem {
     private PickupSubsystem() {
         io_ = new PickupSubsystemPeriodicIo();
         pivot_motor_ = new CANSparkMax(PickupConstants.PIVOT_MOTOR_ID , MotorType.kBrushless);
-        pivot_encoder_ = pivot_motor_.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle)
+        pivot_encoder_ = pivot_motor_.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle);
         roller_motor_ = new CANSparkMax(PickupConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
         pivot_controller_ = pivot_motor_.getPIDController();
 
@@ -68,27 +70,27 @@ public class PickupSubsystem extends Subsystem {
 
     @Override
     public void readPeriodicInputs(double timestamp) {
-        io_.current_pivot_angle =  (pivot_encoder_.getPosition() - PickupConstants.PIVOT_OFFSET) *  (2*Math.PI);
+        io_.current_pivot_angle_ = (pivot_encoder_.getPosition() - PickupConstants.PIVOT_OFFSET) *  (2*Math.PI);
     }
 
     @Override
     public void updateLogic(double timestamp) {
-        io_.pivot_arb_ff_ = Math.cos(io_.current_pivot_angle) * PickupConstants.PIVOT_CONTROLLER_FF;
+        io_.pivot_arb_ff_ = Math.cos(io_.current_pivot_angle_) * PickupConstants.PIVOT_CONTROLLER_FF;
 
         switch(io_.mode_){
-            FLOOR_PICKUP:
+            case FLOOR_PICKUP:
                 io_.target_pivot_angle_ = PickupConstants.PIVOT_OUT;
                 io_.target_roller_speed_ = PickupConstants.ROLLER_PICKUP_SPEED;
                 break;
-            SOURCE_PICKUP:
+            case SOURCE_PICKUP:
                 io_.target_pivot_angle_ = PickupConstants.PIVOT_IN;
                 io_.target_roller_speed_ = PickupConstants.ROLLER_PICKUP_SPEED;
                 break;
-            SHOOT:
+            case SHOOT:
                 io_.target_pivot_angle_ = PickupConstants.PIVOT_IN;
-                io_.target_roller_speed_ = ;
+                io_.target_roller_speed_ = PickupConstants.ROLLER_SHOOT_SPEED;
                 break;
-            IDLE:
+            case IDLE:
             default:
                 io_.target_pivot_angle_ = PickupConstants.PIVOT_IN;
                 io_.target_roller_speed_ = 0;
@@ -99,7 +101,7 @@ public class PickupSubsystem extends Subsystem {
     @Override
     public void writePeriodicOutputs(double timestamp) {
         pivot_controller_.setReference(((io_.target_pivot_angle_ / (2 * Math.PI)) + PickupConstants.PIVOT_OFFSET), ControlType.kPosition, 0, io_.pivot_arb_ff_);
-        roller_motor_.set(target_roller_speed_);
+        roller_motor_.set(io_.target_roller_speed_);
     }
 
     @Override
@@ -107,7 +109,7 @@ public class PickupSubsystem extends Subsystem {
     }
 
     public void setMode(PickupMode mode){
-        io_.mode = mode_
+        io_.mode_ = mode;
     }
 
     public class PickupSubsystemPeriodicIo implements Logged {
@@ -115,6 +117,8 @@ public class PickupSubsystem extends Subsystem {
         public double current_pivot_angle_ = 0.0;
         @Log.File
         public double target_pivot_angle_ = 0.0;
+        @Log.File
+        public double target_roller_speed_ = 0.0;
         @Log.File
         public double pivot_arb_ff_ = 0.0;
         @Log.File
