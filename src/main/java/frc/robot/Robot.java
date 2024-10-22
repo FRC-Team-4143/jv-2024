@@ -29,14 +29,15 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   // Pivot Constants
-  private static final double INTAKE_PIVOT_OUT = Math.toRadians(0);
-  private static final double INTAKE_PIVOT_IN = Math.toRadians(180);
-  private static final double INTAKE_PIVOT_OFFSET = 0.8; // Encoder Native Unit (Rotations)
-  private static final double INTAKE_PIVOT_CONTROLLER_P = 0.005;
-  private static final double INTAKE_PIVOT_CONTROLLER_D = 0.05;
-  private static final double INTAKE_PIVOT_CONTROLLER_FF = 0.75;
+  private static final double INTAKE_PIVOT_OUT = Math.toRadians(-30);
+  private static final double INTAKE_PIVOT_IN = Math.toRadians(190);
+  private static final double INTAKE_PIVOT_OFFSET = 0.29; // Encoder Native Unit (Rotations)
+  private static final double INTAKE_PIVOT_CONTROLLER_P = 0.8;
+  private static final double INTAKE_PIVOT_CONTROLLER_D = 0.00;
+  private static final double INTAKE_PIVOT_CONTROLLER_FF = 0.55;
 
   double current_pivot_angle = 0.0;
+  double intake_pivot_setpoint = INTAKE_PIVOT_IN;
 
   // Shooter Constants
   public static final double SHOOT_SPEED = 0.99;
@@ -83,7 +84,7 @@ public class Robot extends TimedRobot {
     intakePivotController.setFeedbackDevice(intakePivotEncoder);
     intakePivotController.setP(INTAKE_PIVOT_CONTROLLER_P);
     intakePivotController.setD(INTAKE_PIVOT_CONTROLLER_D);
-    intakePivotController.setOutputRange(-1, 1, 0);
+    intakePivot.setInverted(true);
     
 
     shootAndMoveAuto = Commands.startEnd(
@@ -127,12 +128,12 @@ public class Robot extends TimedRobot {
     // Call the scheduler so that commands work for buttons
     CommandScheduler.getInstance().run();
 
-    SmartDashboard.putNumber("Intake Encoder", intakePivotEncoder.getPosition());
-    SmartDashboard.putNumber("Inatke Percent Power", intakePivot.getAppliedOutput());
+    SmartDashboard.putNumber("Pivot Position (rots)", intakePivotEncoder.getPosition());
+    SmartDashboard.putNumber("Pivot Power (pct)", intakePivot.getAppliedOutput());
 
     current_pivot_angle =  (intakePivotEncoder.getPosition() - INTAKE_PIVOT_OFFSET) *  (2*Math.PI);
 
-    SmartDashboard.putNumber("Encoder Position", current_pivot_angle);
+    SmartDashboard.putNumber("Pivot Position (degs)", Math.toDegrees(current_pivot_angle));
 
 
     // tell the subsystems to output telemetry to smartdashboard
@@ -196,15 +197,18 @@ public class Robot extends TimedRobot {
     }
 
     // Pivot Control
-    double pivot_arb_ff = Math.cos(current_pivot_angle) * INTAKE_PIVOT_CONTROLLER_FF;
-    SmartDashboard.putNumber("Encoder FF", pivot_arb_ff);
-
-    if (driver_controller.getLeftBumper()) {
-      intakePivotController.setReference(((INTAKE_PIVOT_OUT / 2 * Math.PI) + INTAKE_PIVOT_OFFSET), ControlType.kPosition, 0, pivot_arb_ff);
-    }
     if (driver_controller.getRightBumper()) {
-      intakePivotController.setReference(((INTAKE_PIVOT_IN / 2 * Math.PI) + INTAKE_PIVOT_OFFSET), ControlType.kPosition, 0, pivot_arb_ff);
+      intake_pivot_setpoint = INTAKE_PIVOT_OUT;
     }
+    if (driver_controller.getLeftBumper()) {
+      intake_pivot_setpoint = INTAKE_PIVOT_IN;
+    }
+    SmartDashboard.putNumber("Pivot Setpoint (degs)", Math.toDegrees(intake_pivot_setpoint));
+
+    double pivot_arb_ff = Math.cos(current_pivot_angle) * INTAKE_PIVOT_CONTROLLER_FF;
+    SmartDashboard.putNumber("Pivot FF", pivot_arb_ff);
+    intakePivotController.setReference(((intake_pivot_setpoint / (2 * Math.PI)) + INTAKE_PIVOT_OFFSET), ControlType.kPosition, 0, pivot_arb_ff);
+
 
     // Shooter Control
     if (mode == 0.0) {
