@@ -168,8 +168,6 @@ public class SwerveDrivetrain extends Subsystem {
                 .getStructArrayTopic("module_states/requested", SwerveModuleState.struct).publish();
         current_state_pub = NetworkTableInstance.getDefault()
                 .getStructArrayTopic("module_states/current", SwerveModuleState.struct).publish();
-
-        SmartDashboard.putData("Set Wheel Offsets", Commands.runOnce(() -> tareEverything(), this));
     }
 
     @Override

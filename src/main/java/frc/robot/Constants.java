@@ -43,4 +43,51 @@ public final class Constants {
 
   }
 
+  public static class PickupConstants{
+    // Motor IDs
+    public static final int PIVOT_MOTOR_ID = 8;
+    public static final int ROLLER_MOTOR_ID = 7;
+
+    public static final boolean PIVOT_MOTOR_INV = true;
+    public static final boolean ROLLER_MOTOR_INV = true;
+
+    // Pivot Control
+    public static final double PIVOT_OUT = Math.toRadians(-30);
+    public static final double PIVOT_IN = Math.toRadians(190);
+    public static final double PIVOT_OFFSET = 0.29; // Encoder Native Unit (Rotations)
+    public static final double PIVOT_CONTROLLER_P = 0.8;
+    public static final double PIVOT_CONTROLLER_D = 0.00;
+    public static final double PIVOT_CONTROLLER_FF = 0.55;
+
+    // Speeds
+    public static final double ROLLER_PICKUP_SPEED = 0.5;
+    public static final double ROLLER_SHOOT_SPEED = -0.15;
+  }
+
+  public static class ShooterConstants{
+    // Motor IDs
+    public static final int UPPER_LEFT_MOTOR_ID = 3;
+    public static final int LOWER_LEFT_MOTOR_ID = 4;
+    public static final int UPPER_RIGHT_MOTOR_ID = 1;
+    public static final int LOWER_RIGHT_MOTOR_ID = 2;
+
+    // Speeds
+    public static final double SHOOT_SPEED = 1.0;
+    public static final double SHOOT_SPEED_SPIN_FACTOR = 0.8;
+    public static final double SOURCE_INTAKE_SPEED = -0.3;
+  }
+
+  public static class ClimberConstants{
+    // Motor IDs
+    public static final int LEFT_MOTOR_ID = 6;
+    public static final int RIGHT_MOTOR_ID = 5;
+
+    public static final boolean LEFT_MOTOR_INV = true;
+    public static final boolean RIGHT_MOTOR_INV = true;
+
+    // Speeds
+    public static final double EXTEND_SPEED = 0.5;
+    public static final double RETRACT_SPEED = -0.5;
+  }
+
 }

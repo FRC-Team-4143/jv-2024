@@ -17,13 +17,13 @@ public class RobotContainer extends SubsystemManager {
         return instance;
     }
 
-
-  
   public RobotContainer() {
     // !!!!!! ALL SUBSYSTEMS MUST BE REGISTERED HERE TO RUN !!!!!!!
 
     registerSubsystem(SwerveDrivetrain.getInstance());
-    // subsystems.add(ExampleSubsystem.getInstance());
+    registerSubsystem(ShooterSubsystem.getInstance());
+    registerSubsystem(PickupSubsystem.getInstance());
+    registerSubsystem(ClimberSubsystem.getInstance());
 
     // !!!!! LEAVE THESE LINES AS THE LAST LINE IN THE CONSTRUCTOR !!!!!!
     reset();
