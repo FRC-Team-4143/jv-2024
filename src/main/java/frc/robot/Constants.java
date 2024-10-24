@@ -49,19 +49,21 @@ public final class Constants {
     public static final int ROLLER_MOTOR_ID = 7;
 
     public static final boolean PIVOT_MOTOR_INV = true;
-    public static final boolean ROLLER_MOTOR_INV = true;
+    public static final boolean ROLLER_MOTOR_INV = false;
 
     // Pivot Control
     public static final double PIVOT_OUT = Math.toRadians(-30);
-    public static final double PIVOT_IN = Math.toRadians(190);
+    public static final double PIVOT_IN = Math.toRadians(180);
+    public static final double PIVOT_SHOOT = Math.toRadians(190);
     public static final double PIVOT_OFFSET = 0.29; // Encoder Native Unit (Rotations)
     public static final double PIVOT_CONTROLLER_P = 0.8;
     public static final double PIVOT_CONTROLLER_D = 0.00;
-    public static final double PIVOT_CONTROLLER_FF = 0.55;
+    public static final double PIVOT_CONTROLLER_FF = 0.35;
 
     // Speeds
-    public static final double ROLLER_PICKUP_SPEED = 0.5;
-    public static final double ROLLER_SHOOT_SPEED = -0.15;
+    public static final double ROLLER_PICKUP_SPEED = 0.75;
+    public static final double ROLLER_SHOOT_SPEED = -1.0;
+    public static final double ROLLER_INDEX_SPEED = 0.1;
   }
 
   public static class ShooterConstants{

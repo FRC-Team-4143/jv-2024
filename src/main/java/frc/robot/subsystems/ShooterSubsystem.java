@@ -65,7 +65,7 @@ public class ShooterSubsystem extends Subsystem {
     public void updateLogic(double timestamp) {
         switch(io_.mode_){
             case SOURCE_PICKUP:
-                io_.target_left_shooter_speed_ = ShooterConstants.SOURCE_INTAKE_SPEED;
+                io_.target_left_shooter_speed_ = -ShooterConstants.SOURCE_INTAKE_SPEED;
                 io_.target_right_shooter_speed_ = ShooterConstants.SOURCE_INTAKE_SPEED;
                 break;
             case SHOOT:

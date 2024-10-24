@@ -64,6 +64,11 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void autonomousExit() {
+    SwerveDrivetrain.getInstance().seedFieldRelative(AutoManager.getInstance().getAutonomousGyroOFFSET());
+  }
+
+  @Override
   public void teleopInit() {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();

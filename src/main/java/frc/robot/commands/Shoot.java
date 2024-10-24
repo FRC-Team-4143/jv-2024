@@ -15,6 +15,7 @@ public class Shoot extends Command {
 
   static PickupSubsystem pickup_ = PickupSubsystem.getInstance();
   static ShooterSubsystem shooter_ = ShooterSubsystem.getInstance();
+  private int timerCount;
 
   public Shoot() {
     addRequirements(shooter_);
@@ -25,12 +26,17 @@ public class Shoot extends Command {
   @Override
   public void initialize() {
     shooter_.setMode(ShooterMode.SHOOT);
-    pickup_.setMode(PickupMode.SHOOT);
+    pickup_.setMode(PickupMode.STAGE);
+    timerCount = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    timerCount++;
+    if (timerCount >= 33) {
+      pickup_.setMode(PickupMode.SHOOT);
+    }
   }
 
   // Called once the command ends or is interrupted.

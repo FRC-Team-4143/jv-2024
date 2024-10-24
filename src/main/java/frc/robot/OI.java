@@ -64,6 +64,6 @@ public abstract class OI {
         double val = driver_joystick_.getRightX();
         double output = val * val;
         output = Math.copySign(output, val);
-        return output;
+        return -output;
     }
 }

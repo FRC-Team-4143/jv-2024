@@ -44,7 +44,9 @@ public class PickupSubsystem extends Subsystem {
         FLOOR_PICKUP,
         SOURCE_PICKUP,
         IDLE,
-        SHOOT
+        SHOOT,
+        STAGE,
+        INDEX
     }
 
     private PickupSubsystem() {
@@ -87,8 +89,16 @@ public class PickupSubsystem extends Subsystem {
                 io_.target_roller_speed_ = PickupConstants.ROLLER_PICKUP_SPEED;
                 break;
             case SHOOT:
-                io_.target_pivot_angle_ = PickupConstants.PIVOT_IN;
+                io_.target_pivot_angle_ = PickupConstants.PIVOT_SHOOT;
                 io_.target_roller_speed_ = PickupConstants.ROLLER_SHOOT_SPEED;
+                break;
+            case STAGE:
+                io_.target_pivot_angle_ = PickupConstants.PIVOT_SHOOT;
+                io_.target_roller_speed_ = PickupConstants.ROLLER_INDEX_SPEED;
+                break;
+            case INDEX:
+                io_.target_pivot_angle_ = PickupConstants.PIVOT_IN;
+                io_.target_roller_speed_ = PickupConstants.ROLLER_INDEX_SPEED;
                 break;
             case IDLE:
             default:
@@ -106,6 +116,7 @@ public class PickupSubsystem extends Subsystem {
 
     @Override
     public void outputTelemetry(double timestamp) {
+        SmartDashboard.putNumber("Pivot Angle", io_.current_pivot_angle_);
     }
 
     public void setMode(PickupMode mode){

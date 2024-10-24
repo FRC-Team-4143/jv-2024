@@ -242,7 +242,7 @@ public class SwerveDrivetrain extends Subsystem {
             case AUTONOMOUS:
                 setControl(robot_centric
                         // Drive forward with negative Y (forward)
-                        .withVelocityX(-0.5)
+                        .withVelocityX(0.5)
                         // Drive left with negative X (left)
                         .withVelocityY(0)
                         //
@@ -327,6 +327,10 @@ public class SwerveDrivetrain extends Subsystem {
      */
     public void seedFieldRelative() {
         io_.field_relative_offset_ = io_.robot_yaw_;
+    }
+
+    public void seedFieldRelative(Double angle) {
+        io_.field_relative_offset_ = new Rotation2d(angle.doubleValue());
     }
 
     /**

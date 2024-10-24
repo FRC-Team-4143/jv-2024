@@ -64,7 +64,7 @@ public class SwerveModuleConstants {
     public Slot0Configs DriveMotorGains = new Slot0Configs();
 
     /** The maximum amount of stator current the drive motors can apply without slippage. */
-    public double SlipCurrent = 400;
+    public double SlipCurrent = 30;
 
     /** True if the steering motor is reversed from the CANcoder. */
     public boolean SteerMotorInverted = false;
@@ -92,7 +92,7 @@ public class SwerveModuleConstants {
      * Otherwise, users have the option to use either FusedCANcoder or SyncCANcoder depending
      * on if there is a risk that the CANcoder can fail in a way to provide "good" data.
      */
-    public SwerveModuleSteerFeedbackType FeedbackSource = SwerveModuleSteerFeedbackType.AnalogEncoder;
+    public SwerveModuleSteerFeedbackType FeedbackSource = SwerveModuleSteerFeedbackType.RemoteCANcoder;
 
     /**
      * Sets the CAN ID of the drive motor.

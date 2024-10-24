@@ -21,15 +21,21 @@ public class AutoManager {
     }
 
     private SendableChooser<Command> autoChooser = new SendableChooser<>();
+    private SendableChooser<Double> autoGyroOffset = new SendableChooser<>();
 
     private AutoManager() {
 
         autoChooser.addOption("Shoot & Go", new Shoot().withTimeout(5).andThen(new AutoReverse().withTimeout(2)));
         autoChooser.addOption("Shoot & Stay", new Shoot().withTimeout(5));
         autoChooser.addOption("Nothing", new WaitCommand(5));
-
         autoChooser.setDefaultOption("Nothing", new WaitCommand(5));
         SmartDashboard.putData("Selected Auto", autoChooser);
+
+        autoGyroOffset.addOption("Amp", 45.0);
+        autoGyroOffset.addOption("Source", -45.0);
+        autoGyroOffset.addOption("None", 0.0);
+        autoGyroOffset.setDefaultOption("None", 0.0);
+        SmartDashboard.putData("autoGyroOffset", autoGyroOffset);
     }
 
     public SendableChooser<Command> getAutoChooser(){
@@ -38,6 +44,10 @@ public class AutoManager {
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
+    }
+
+    public Double getAutonomousGyroOFFSET() {
+        return autoGyroOffset.getSelected();
     }
 
 }

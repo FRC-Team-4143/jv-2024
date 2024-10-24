@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.PickupSubsystem;
 import frc.robot.subsystems.PickupSubsystem.PickupMode;
 
@@ -31,7 +32,7 @@ public class FloorPickup extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    pickup_.setMode(PickupMode.IDLE);
+    Commands.startEnd(() -> pickup_.setMode(PickupMode.INDEX), () -> pickup_.setMode(PickupMode.IDLE), pickup_).withTimeout(.75).schedule();
   }
 
   // Returns true when the command should end.

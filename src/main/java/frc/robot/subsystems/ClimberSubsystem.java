@@ -35,6 +35,10 @@ public class ClimberSubsystem extends Subsystem {
     public CANSparkMax right_motor_;
     public CANSparkMax left_motor_;
 
+    public void spinLeftMotor(double speed) {
+        left_motor_.set(speed);
+    }
+
     public enum ClimberMode {
         EXTEND,
         IDLE,

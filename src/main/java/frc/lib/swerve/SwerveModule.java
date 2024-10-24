@@ -149,16 +149,15 @@ public class SwerveModule {
             System.out
                     .println("Talon ID " + constants.DriveMotorId + " failed config with error " + response.toString());
         }
-        /*
-         * CANcoderConfiguration cancoderConfigs = new CANcoderConfiguration();
-         * cancoderConfigs.MagnetSensor.MagnetOffset = constants.CANcoderOffset;
-         * response = m_cancoder.getConfigurator().apply(cancoderConfigs);
-         * if (!response.isOK()) {
-         * System.out.println(
-         * "CANcoder ID " + constants.DriveMotorId + " failed config with error " +
-         * response.toString());
-         * }
-         */
+        CANcoderConfiguration cancoderConfigs = new CANcoderConfiguration();
+        cancoderConfigs.MagnetSensor.MagnetOffset = constants.CANcoderOffset;
+        response = m_encoder.getConfigurator().apply(cancoderConfigs);
+        if (!response.isOK()) {
+            System.out.println(
+            "CANcoder ID " + constants.DriveMotorId + " failed config with error " +
+            response.toString());
+        }
+        
 
         m_drivePosition = m_driveMotor.getPosition().clone();
         m_driveVelocity = m_driveMotor.getVelocity().clone();
@@ -326,7 +325,7 @@ public class SwerveModule {
     }
 
     public void setWheelOffsets() {
-        // m_steerMotor.setPosition(0);
+        m_steerMotor.setPosition(0);
 
         m_encoder.getAbsolutePosition().refresh();
         angleOffset = m_encoder.getAbsolutePosition().getValueAsDouble();
@@ -337,9 +336,8 @@ public class SwerveModule {
 
     public void resetToAbsolute() {
         m_encoder.getAbsolutePosition().refresh();
-        double absolutePosition = m_encoder.getAbsolutePosition().getValueAsDouble() * 360.0 -
-                angleOffset;
-        //m_steerMotor.setPosition(absolutePosition / 360.0);  //  use startup value bevel gears to right
+        double absolutePosition = m_encoder.getAbsolutePosition().getValueAsDouble() - angleOffset;
+        m_steerMotor.setPosition(absolutePosition);  //  use startup value bevel gears to right
     }
 
     public void optimizeCan() {
