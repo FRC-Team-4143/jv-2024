@@ -40,10 +40,10 @@ public abstract class OI {
         driver_joystick_.leftBumper().whileTrue(new SourcePickup());
 
         // Extend Climber
-        driver_joystick_.y().whileTrue(new ExtendClimber());
+        driver_joystick_.x().whileTrue(new ExtendClimber());
 
         // Retract Climber
-        driver_joystick_.a().whileTrue(new RetractClimber());
+        driver_joystick_.b().whileTrue(new RetractClimber());
     }
 
     static public double getDriverJoystickLeftX() {
